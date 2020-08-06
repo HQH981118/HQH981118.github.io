@@ -2,7 +2,7 @@
 description: 在centos 7上安装nvidia-docker
 ---
 
-# nvidia-docker
+# docker
 
 ## Install docker on centos 7
 
