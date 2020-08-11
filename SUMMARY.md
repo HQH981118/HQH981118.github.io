@@ -5,6 +5,7 @@
 ## NLP
 
 * [roberta-tiny service](nlp/roberta-tiny-service.md)
+* [Predict Likability of Books](nlp/predict-likability-of-books.md)
 
 ## Tools
 
