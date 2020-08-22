@@ -6,11 +6,11 @@ description: 基于roberta-tiny的句向量服务
 
 
 
-* 背景介绍
+* **背景介绍**
 
     google发布的大规模预训练模型bert在nlp诸多任务fine-tune后刷新了SOTA，后续有许多工作跟随着bert进行开展。其中roberta以更大规模的训练语料，更久的训练时间，并在预训练阶段取消了NSP\(Next Sentence Predict\)，进一步提高了模型的准确度。但是无论是bert还是roberta，它们的参数量巨大（110M），对服务器gpu的资源占用率很高，模型推理速度欠佳。因此我们考虑采用更轻量级的roberta-tiny模型，开源自[https://github.com/ZhuiyiTechnology/pretrained-models](https://github.com/ZhuiyiTechnology/pretrained-models). 
 
-* roberta-tiny
+* **roberta-tiny**
 
     【配置】 4层模型，hidden size为384，对Embedding层做了低秩分解\(384-&gt;128-&gt;384\)，可以用[bert4keras](https://github.com/bojone/bert4keras/tree/master/examples)加载使用。
 
@@ -18,9 +18,11 @@ description: 基于roberta-tiny的句向量服务
 
     【备注】 速度跟[albert tiny](https://github.com/brightmart/albert_zh)一致，普通分类性能也基本一致，但由于roberta模型并没有参数共享这个约束，所以在生成式任务等复杂任务上效果优于albert tiny。
 
-* 预训练——小说长文本场景下的预训练
+* **预训练——小说长文本场景下的预训练**
 
-    由ZhuiyiTechnology开源的roberta-tiny预训练模型，在百度百科的训练语料基础上增加了新闻领域的数据，总共35G的训练语料。针对小说网文领域和通用领域存在一定gap的情况，我们考虑在加载已有的预训练参数后，继续在米读小说数据集上进行pre-training，以获得更加适合米读小说的语言模型。在预训练过程中，对比roberta我们做了三个改进：1. 采取多句拼接，并且来源于统一连续文本；2. 以词维度进行mask；3. 采用lamd优化器。
+    前段时间acl公布的ACL2020 best paper中，看到了一篇名为 [Don’t Stop Pretraining: Adapt Language Models to Domains and Tasks](https://www.aclweb.org/anthology/2020.acl-main.740.pdf)。这篇论文通过大量实验证明，在自己的训练数据集或领域数据集上继续预训练在fine-tune
+
+由ZhuiyiTechnology开源的roberta-tiny预训练模型，在百度百科的训练语料基础上增加了新闻领域的数据，总共35G的训练语料。针对小说网文领域和通用领域存在一定gap的情况，我们考虑在加载已有的预训练参数后，继续在米读小说数据集上进行pre-training，以获得更加适合米读小说的语言模型。在预训练过程中，对比roberta我们做了三个改进：1. 采取多句拼接，并且来源于统一连续文本；2. 以词维度进行mask；3. 采用lamd优化器。
 
     【训练语料】米读小说中已有评级的书籍前100章内容。（42G）
 
@@ -30,23 +32,35 @@ description: 基于roberta-tiny的句向量服务
 
     【训练结果】在两块GPU V100上训练两周，loss=2.5648766424179077,  mlm\_acc=0.5974433,  mlm\_loss=1.9674323。
 
-* 句向量特征提取
+* **句向量特征提取**
 
-    roberta-tiny预训练结束后，我们将其参数固定，利用语言模型对句子进行向量化编码。客户端输入一段小说内容，返回一个维度为384的向量，该向量能够很好地表征句子段落信息。通过[bert-as-service](https://github.com/hanxiao/bert-as-service)可以很方便地将模型部署在服务器上，而且提供了友好的客户端访问接口。为了方便部署&管理，我们使用docker部署bert-as-service服务。docker run --gpus '"device=0"' -p 5555:5555 -p 5556:5556 -itd roberta-tiny，启动容器。
+    roberta-tiny预训练结束后，我们将其参数固定，利用语言模型对句子进行向量化编码。客户端输入一段小说内容，返回一个维度为384的向量，该向量能够很好地表征句子段落信息。通过[bert-as-service](https://github.com/hanxiao/bert-as-service)可以很方便地将模型部署在服务器上，而且提供了友好的客户端访问接口。
 
-* 接口调用（临时方案）
+* **接口调用**
 
-    qa\_domain: 172.25.25.19
+    推荐方式：
 
-    prd\_domain: 172.29.4.142
+```python
+from bert_serving.client import BertClient
+bc = BertClient(ip='xx.xx.xx.xx')  # ip address of the GPU machine
+bc.encode(['First do it', 'then do it right', 'then do it better'])
+```
 
-    调用方式参照[bert-as-service](https://github.com/hanxiao/bert-as-service)
+    同时提供restful api接口：
 
-* 结果展示
+```bash
+curl -X POST http://xx.xx.xx.xx:8125/encode \
+  -H 'content-type: application/json' \
+  -d '{"id": 123,"texts": ["hello world"], "is_tokenized": false}'
+```
 
-\#\# TODO
+{% hint style="info" %}
+注意：若要使用http请求，需要在server端主动开启，否则默认不支持http请求。
+{% endhint %}
 
-* 性能评估
+* 工程部署
+
+在对模型进行压缩后，
 
 \#\# TODO
 
