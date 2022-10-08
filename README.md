@@ -20,7 +20,13 @@ Sorry, I haven't published any publications. :joy: But in the future, there will
 
 > _Ads Algorithm Engineer, Monetization Technology_
 
+Applied advanced machine learning algorithm in ads ranking, such as modeling CTR/CVR in fine ranking.
 
+Responsible for the monetization of GIP which contains Toutiao, Xigua, Xiaoshuo apps.
+
+{% content-ref url="https://app.gitbook.com/s/0CLjM13zh4QocBEG7IPS/" %}
+[BYTEDANCE](https://app.gitbook.com/s/0CLjM13zh4QocBEG7IPS/)
+{% endcontent-ref %}
 
 **QTT**                                                                                                                                                     _Jan 2020 - Dec 2020_
 
