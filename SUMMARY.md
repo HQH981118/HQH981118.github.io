@@ -1,3 +1,3 @@
 # Table of contents
 
-* [L](README.md)
+* [Qihao Huang](README.md)
